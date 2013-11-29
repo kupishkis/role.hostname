@@ -1,13 +1,24 @@
 # file: roles/hostname/tasks/main.yml
+- name: read old hostname
+  command: hostname
+  register: old_hostname
 
-- name: Hostname | Update the hostname (pt. 1) - hostname cmd
+- debug: var=old_hostname.stdout
+
+- name: read old fqdn
+  command: hostname -f
+  register: old_fqdn
+
+- debug: var=old_fqdn.stdout
+
+- name: update the runtime hostname
   sudo: true
   command: sudo hostname -v "{{hostname}}"
 
-- name: Hostname | Update the hostname (pt. 2) - (/etc/hostname)
+- name: update the permanent hostname
   sudo: true
   template: src=etc_hostname.j2 dest=/etc/hostname owner=root group=root mode=064
 
-- name: Hostname | Update the hostname (pt. 3) - (/etc/hosts)
+- name: update references to new hostname
   sudo: true
-  lineinfile: dest=/etc/hosts regexp="^127.0.0.1    {{fqdn}}    {{hostname}}" line="127.0.0.1    {{fqdn}}    {{hostname}}" state=present
+  lineinfile: dest=/etc/hosts regexp="^127.0.0.1\s*{{old_fqdn.stdout}}\s*{{old_hostname.stdout}}" line="127.0.0.1    {% if fqdn is defined %}{{fqdn}}{% else %}{{old_fqdn.stdout}}{% endif %}    {{hostname}}" state=present
