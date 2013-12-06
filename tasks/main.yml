@@ -2,12 +2,14 @@
 - name: read old hostname
   command: hostname
   register: old_hostname
+  ignore_errors: true
 
 - debug: var=old_hostname.stdout
 
 - name: read old fqdn
   command: hostname -f
   register: old_fqdn
+  ignore_errors: true
 
 - debug: var=old_fqdn.stdout
 
