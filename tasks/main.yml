@@ -1,18 +1,4 @@
 # file: roles/hostname/tasks/main.yml
-- name: read old hostname
-  command: hostname
-  register: old_hostname
-  ignore_errors: true
-
-- debug: var=old_hostname.stdout
-
-- name: read old fqdn
-  command: hostname -f
-  register: old_fqdn
-  ignore_errors: true
-
-- debug: var=old_fqdn.stdout
-
 - name: update the runtime hostname
   sudo: true
   command: sudo hostname -v "{{hostname}}"
@@ -23,4 +9,8 @@
 
 - name: update references to new hostname
   sudo: true
-  lineinfile: dest=/etc/hosts regexp="^127.0.0.1\s*{{old_fqdn.stdout}}\s*{{old_hostname.stdout}}" line="127.0.0.1    {% if fqdn is defined %}{{fqdn}}{% else %}{{old_fqdn.stdout}}{% endif %}    {{hostname}}" state=present
+  lineinfile: >
+    dest=/etc/hosts
+    regexp="^127.0.0.1\s*{{ansible_fqdn}}\s*{{ansible_hostname}}"
+    line="127.0.0.1 {% if fqdn is defined %}{{fqdn}} {% else %}{{ansible_fqdn}}{% endif %}{{hostname}}"
+    state=present
