@@ -2,6 +2,7 @@
 - name: update the runtime hostname
   sudo: true
   command: sudo hostname -v "{{hostname}}"
+  when: hostname and not hostname == ansible_hostname
 
 - name: update the permanent hostname
   sudo: true
@@ -15,3 +16,4 @@
     insertafter="^127.0.0.1\s*localhost$"
     line="127.0.1.1 {% if fqdn is defined %}{{fqdn}} {% else %}{{ansible_fqdn}}{% endif %}{{hostname}}"
     state=present
+  when: (hostname is defined and not (hostname == ansible_hostname)) or  (fqdn is defined and not (fqdn == ansible_fqdn))
