@@ -1,7 +1,7 @@
 # file: roles/hostname/tasks/main.yml
 - name: update the runtime hostname
   sudo: true
-  command: sudo hostname -b "{{hostname}}"
+  command: sudo hostname "{{hostname}}"
   when: hostname and not hostname == ansible_hostname
 
 - name: update the permanent hostname
